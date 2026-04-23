@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 
 function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
   useEffect(() => {
     const fn = () => setIsMobile(window.innerWidth < 640);
     window.addEventListener("resize", fn);
@@ -228,7 +228,7 @@ function SectionBox({ children, borderColor, mobile }) {
 // ═══════════════════════════════
 // 📊 NET TAB
 // ═══════════════════════════════
-function NetTab() {
+function NetTab({ isMobile }) {
   const [gross, setGross] = useState("");
   const [basic, setBasic] = useState("");
   const [mode, setMode] = useState("gtn");
@@ -303,7 +303,7 @@ function NetTab() {
 // ═══════════════════════════════
 // 🎁 BONUS TAB
 // ═══════════════════════════════
-function BonusTab() {
+function BonusTab({ isMobile }) {
   const [mg, setMg] = useState("");
   const [bs, setBs] = useState("");
   const [bi, setBi] = useState("");
@@ -389,7 +389,7 @@ function BonusTab() {
 // ═══════════════════════════════
 // 💬 CHAT TAB
 // ═══════════════════════════════
-function ChatTab() {
+function ChatTab({ isMobile }) {
   const [msgs, setMsgs] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -727,11 +727,11 @@ export default function App() {
 
       {/* ─── Content ─── */}
       {tab === "chat" ? (
-        <ChatTab />
+        <ChatTab isMobile={isMobile} />
       ) : (
         <div style={{ flex: 1, overflowY: "auto", padding: isMobile ? 12 : 20, scrollbarWidth: "thin", scrollbarColor: `${C.border} transparent` }}>
-          {tab === "net"   && <NetTab />}
-          {tab === "bonus" && <BonusTab />}
+          {tab === "net"   && <NetTab isMobile={isMobile} />}
+          {tab === "bonus" && <BonusTab isMobile={isMobile} />}
         </div>
       )}
 
