@@ -1,5 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+  useEffect(() => {
+    const fn = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
+  }, []);
+  return isMobile;
+}
+
 // ═══════════════════════════════
 // 🎨 EGYTRANS NOSCO BRAND COLORS
 // ═══════════════════════════════
@@ -203,11 +213,11 @@ function Legal({ text }) {
   );
 }
 
-function SectionBox({ children, borderColor }) {
+function SectionBox({ children, borderColor, mobile }) {
   return (
     <div style={{
       background: C.white, border: `1.5px solid ${borderColor || C.border}`,
-      borderRadius: 16, padding: 22, marginBottom: 14,
+      borderRadius: 16, padding: mobile ? 14 : 22, marginBottom: 14,
       boxShadow: "0 2px 12px rgba(27,58,140,0.06)"
     }}>
       {children}
@@ -252,8 +262,8 @@ function NetTab() {
         ))}
       </div>
 
-      <SectionBox>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+      <SectionBox mobile={isMobile}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12 }}>
           <NInput label={mode === "gtn" ? "الراتب الإجمالي (ج/شهر)" : "الصافي المطلوب (ج/شهر)"}
             value={gross} onChange={setGross}
             help={mode === "gtn" ? "كامل ما يتقاضاه الموظف" : "المبلغ الذي يصل للموظف"} />
@@ -269,7 +279,7 @@ function NetTab() {
               🔄 Grossing Up: صافي {fmt(res.targetNet)} ج → إجمالي {fmt(res.gross)} ج
             </div>
           )}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10, marginBottom: 18 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(3,1fr)", gap: 10, marginBottom: 18 }}>
             <Card icon="💰" label="الإجمالي" val={`${fmt(res.gross)} ج`} color={C.blue} bg={C.bluePale} />
             <Card icon="📉" label="إجمالي الخصومات" val={`${fmt(res.siEmp + res.martyrs + res.taxMo)} ج`} color={C.red} bg={C.redLight} />
             <Card icon="✅" label="الصافي" val={`${fmt(res.net)} ج`} color={C.green} bg={C.greenPale} />
@@ -333,8 +343,8 @@ function BonusTab() {
         ))}
       </div>
 
-      <SectionBox borderColor={`${C.green}50`}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+      <SectionBox borderColor={`${C.green}50`} mobile={isMobile}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12, marginBottom: 12 }}>
           <NInput label="الراتب الإجمالي الشهري (ج)" value={mg} onChange={setMg} help="لتحديد الوعاء الضريبي الحالي" />
           <NInput label="الأساسي الشهري (ج)" value={bs} onChange={setBs} help="اتركه فارغاً إذا = الإجمالي" />
         </div>
@@ -351,7 +361,7 @@ function BonusTab() {
               🔄 Gross-Up: صافي مكافأة {fmt(res.targetNet)} ج → إجمالي {fmt(res.grossBonus)} ج
             </div>
           )}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10, marginBottom: 18 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(3,1fr)", gap: 10, marginBottom: 18 }}>
             <Card icon="🎁" label="إجمالي المكافأة" val={`${fmt(res.grossBonus)} ج`} color={C.blue} bg={C.bluePale} />
             <Card icon="📊" label="نسبة الضريبة الفعلية" val={`${res.effRate.toFixed(1)}%`} color={C.red} bg={C.redLight} />
             <Card icon="✅" label="صافي المكافأة" val={`${fmt(res.netBonus)} ج`} color={C.green} bg={C.greenPale} />
@@ -433,7 +443,7 @@ function ChatTab() {
               Net • Gross-Up • ضريبة المكافآت • إعانة الطوارئ<br />
               <span style={{ fontSize: 10.5, color: C.textLight }}>محدث 2026 — شهداء 0.05% ✓ — منظومة توحيد الضرائب ✓</span>
             </p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, maxWidth: 620, margin: "0 auto" }}>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 8, maxWidth: 620, margin: "0 auto" }}>
               {qs.map(q => (
                 <button key={q} onClick={() => { setInput(q); taRef.current?.focus(); }}
                   style={{
@@ -624,6 +634,7 @@ function TutorialModal({ onClose }) {
 export default function App() {
   const [tab, setTab] = useState("net");
   const [showTutorial, setShowTutorial] = useState(true);
+  const isMobile = useIsMobile();
 
   const tabs = [
     { id: "net",   l: "📊 Net / Gross-Up" },
@@ -644,8 +655,10 @@ export default function App() {
       <div style={{
         background: C.white,
         borderBottom: `2px solid ${C.border}`,
-        padding: "0 20px",
-        display: "flex", alignItems: "center", height: 58, gap: 14, flexShrink: 0,
+        padding: isMobile ? "0 12px" : "0 20px",
+        display: "flex", alignItems: "center",
+        height: isMobile ? 52 : 58,
+        gap: isMobile ? 8 : 14, flexShrink: 0,
         boxShadow: "0 2px 12px rgba(27,58,140,0.08)"
       }}>
         {/* Logo */}
@@ -679,7 +692,7 @@ export default function App() {
         </div>
 
         {/* Badges */}
-        <div style={{ marginRight: "auto", display: "flex", gap: 6 }}>
+        <div style={{ marginRight: "auto", display: isMobile ? "none" : "flex", gap: 6 }}>
           <span style={{ background: C.greenPale, border: `1px solid ${C.green}40`, borderRadius: 20, padding: "3px 10px", fontSize: 10, color: C.green, fontWeight: 600 }}>✓ شهداء 0.05%</span>
           <span style={{ background: C.bluePale, border: `1px solid ${C.blue}30`, borderRadius: 20, padding: "3px 10px", fontSize: 10, color: C.blue, fontWeight: 600 }}>✓ منظومة توحيد</span>
         </div>
@@ -697,8 +710,8 @@ export default function App() {
           {tabs.map(t => (
             <button key={t.id} onClick={() => setTab(t.id)}
               style={{
-                padding: "5px 13px", borderRadius: 8, border: "none", cursor: "pointer",
-                fontSize: 12, fontFamily: "inherit", fontWeight: 600, transition: "all .2s",
+                padding: isMobile ? "5px 8px" : "5px 13px", borderRadius: 8, border: "none", cursor: "pointer",
+                fontSize: isMobile ? 10.5 : 12, fontFamily: "inherit", fontWeight: 600, transition: "all .2s",
                 background: tab === t.id ? C.blue : "transparent",
                 color: tab === t.id ? "#fff" : C.textSub,
                 boxShadow: tab === t.id ? "0 2px 8px rgba(27,58,140,0.25)" : "none"
@@ -716,7 +729,7 @@ export default function App() {
       {tab === "chat" ? (
         <ChatTab />
       ) : (
-        <div style={{ flex: 1, overflowY: "auto", padding: 20, scrollbarWidth: "thin", scrollbarColor: `${C.border} transparent` }}>
+        <div style={{ flex: 1, overflowY: "auto", padding: isMobile ? 12 : 20, scrollbarWidth: "thin", scrollbarColor: `${C.border} transparent` }}>
           {tab === "net"   && <NetTab />}
           {tab === "bonus" && <BonusTab />}
         </div>
