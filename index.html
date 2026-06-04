@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="مساعد موظف المرتبات - إيجيترانس نوسكو. حاسبة صافي المرتب والمكافآت والـ Gross-Up مطابقة لمنظومة الضرائب الموحدة وقانون 7 لسنة 2024.">
+<title>مساعد المرتبات — إيجيترانس نوسكو</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <img class="logo-svg" src="assets/logo.png" alt="EGYTRANS NOSCO">
+      <div class="brand-divider"></div>
+      <div class="brand-text">
+        <h1>مساعد موظف المرتبات</h1>
+        <p>حاسبة الضرائب والمكافآت — مطابقة لمنظومة الضرائب الموحدة</p>
+      </div>
+    </div>
+    <span class="header-badge">قانون 7 لسنة 2024</span>
+  </div>
+</header>
+
+<div class="hero">
+  <h2>احسب <span class="accent">الصافي</span> أو اعمل <span class="accent">Gross-Up</span> بدقة</h2>
+  <p>أداة داخلية لحساب صافي المرتب والمكافآت بنفس طريقة التسوية التراكمية (YTD) المتبعة في منظومة الضرائب الموحدة.</p>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-tab="salary" onclick="switchTab('salary')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+    المرتب الشهري
+  </button>
+  <button class="tab" data-tab="bonus" onclick="switchTab('bonus')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12v10H4V12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+    المكافآت (تسوية YTD)
+  </button>
+</div>
+
+<main class="wrap">
+
+  <!-- ============ SALARY PANEL ============ -->
+  <section class="panel active" id="panel-salary">
+    <div class="grid">
+      <div class="card">
+        <div class="card-title"><span class="dot"></span> بيانات المرتب</div>
+        <div class="card-sub">أدخل القيم الشهرية للموظف</div>
+
+        <div class="mode-toggle">
+          <button class="active" id="sal-mode-net" onclick="setSalMode('net')">من الإجمالي ← الصافي</button>
+          <button id="sal-mode-gross" onclick="setSalMode('gross')">من الصافي ← الإجمالي (Gross-Up)</button>
+        </div>
+
+        <div class="field">
+          <label id="sal-main-label">إجمالي المرتب الشهري <span class="hint">(جنيه)</span></label>
+          <input type="number" id="sal-main" placeholder="مثال: 15000" step="0.01">
+        </div>
+
+        <div class="field">
+          <label>الأجر التأميني الشهري <span class="hint">(يُقرَّب لأعلى 100)</span></label>
+          <input type="number" id="sal-inswage" placeholder="مثال: 10020 ← 10100" step="0.01">
+        </div>
+
+        <div class="adv-toggle" id="sal-adv-toggle" onclick="toggleAdv('sal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          بنود إضافية (استحقاقات / استقطاعات تؤثر على الوعاء)
+        </div>
+        <div class="adv-section" id="sal-adv">
+          <div class="field">
+            <label>استحقاقات أخرى داخلة في وعاء الضريبة <span class="hint">(شهري)</span></label>
+            <input type="number" id="sal-add" placeholder="0" step="0.01">
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label>استقطاعات تُخصم من الوعاء الضريبي <span class="hint">(شهري — قبل الضريبة)</span></label>
+            <input type="number" id="sal-deduct" placeholder="0" step="0.01">
+          </div>
+        </div>
+
+        <button class="btn" id="sal-btn" onclick="calcSalary()">احسب</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot"></span> النتيجة</div>
+        <div class="card-sub">التفصيل الكامل للاستقطاعات</div>
+        <div class="result" id="sal-result">
+          <div class="result-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 7h6m-6 4h6m-6 4h4"/><rect x="4" y="3" width="16" height="18" rx="2"/></svg>
+            <div>أدخل البيانات واضغط احسب لعرض التفصيل</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BONUS PANEL ============ -->
+  <section class="panel" id="panel-bonus">
+    <div class="grid">
+      <div class="card">
+        <div class="card-title"><span class="dot" style="background:var(--navy)"></span> بيانات المكافأة</div>
+        <div class="card-sub">حساب الضريبة بتسوية كاملة من أول السنة</div>
+
+        <div class="mode-toggle">
+          <button class="active" id="bon-mode-net" onclick="setBonMode('net')">من الإجمالي ← الصافي</button>
+          <button id="bon-mode-gross" onclick="setBonMode('gross')">من الصافي ← الإجمالي (Gross-Up)</button>
+        </div>
+
+        <div class="field">
+          <label id="bon-main-label">إجمالي المكافأة <span class="hint">(جنيه)</span></label>
+          <input type="number" id="bon-main" placeholder="مثال: 50000" step="0.01">
+        </div>
+
+        <div class="field">
+          <label>صافي المرتب الشهري الداخل في الوعاء <span class="hint">(بعد التأمينات الشهرية)</span></label>
+          <input type="number" id="bon-salary" placeholder="مثال: 13000" step="0.01">
+        </div>
+
+        <div class="field">
+          <label>شهر صرف المكافأة</label>
+          <select id="bon-month">
+            <option value="1">يناير</option><option value="2">فبراير</option>
+            <option value="3">مارس</option><option value="4">أبريل</option>
+            <option value="5">مايو</option><option value="6" selected>يونيو</option>
+            <option value="7">يوليو</option><option value="8">أغسطس</option>
+            <option value="9">سبتمبر</option><option value="10">أكتوبر</option>
+            <option value="11">نوفمبر</option><option value="12">ديسمبر</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>حصة الموظف من التأمينات على المكافأة <span class="hint">(تُدخَل يدوياً)</span></label>
+          <input type="number" id="bon-ins" placeholder="0" step="0.01">
+        </div>
+
+        <div class="adv-toggle" id="bon-adv-toggle" onclick="toggleAdv('bon')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          مكافآت سابقة هذا العام / بنود إضافية
+        </div>
+        <div class="adv-section" id="bon-adv">
+          <div class="field">
+            <label>إجمالي المكافآت السابقة الخاضعة هذا العام <span class="hint">(من يناير)</span></label>
+            <input type="number" id="bon-prior" placeholder="0" step="0.01">
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label>استحقاقات أخرى شهرية داخلة في الوعاء</label>
+            <input type="number" id="bon-add" placeholder="0" step="0.01">
+          </div>
+        </div>
+
+        <button class="btn green" id="bon-btn" onclick="calcBonus()">احسب المكافأة</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot" style="background:var(--navy)"></span> النتيجة</div>
+        <div class="card-sub">تفصيل التسوية التراكمية (YTD)</div>
+        <div class="result" id="bon-result">
+          <div class="result-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 12v10H4V12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/></svg>
+            <div>أدخل بيانات المكافأة لعرض حساب الضريبة بالتسوية</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LEGAL FOOTER ============ -->
+  <div class="legal">
+    <h3>🧾 الأطر القانونية المُطبَّقة</h3>
+    <div class="legal-grid">
+      <div class="legal-item"><b>ضريبة الدخل — قانون 7/2024</b>شرائح تصاعدية مع اختفاء الشرائح المعفاة فوق 600 ألف، وإعفاء شخصي 20,000 جنيه سنوياً.</div>
+      <div class="legal-item"><b>التأمينات — قانون 148/2019</b>حصة الموظف 11% من الأجر التأميني (حد أدنى 2,700 — حد أقصى 16,700 من يناير 2026)، مع تقريب الأجر التأميني لأعلى 100 — سياسة الشركة.</div>
+      <div class="legal-item"><b>صندوق الشهداء — قانون 4/2021 + الكتاب الدوري 61/2024</b>0.05% من إجمالي المرتب.</div>
+      <div class="legal-item"><b>منظومة الضرائب الموحدة — تسوية YTD</b>الضريبة تُحسب على إجمالي الدخل من أول السنة ثم تُخصم الضريبة المسددة سابقاً.</div>
+    </div>
+  </div>
+
+  <p class="disclaimer">
+    هذه الأداة للاستخدام الداخلي كمساعد حسابي. النتائج تقديرية وقد تختلف بفروق التقريب عن المنظومة الرسمية حسب البنود الفعلية لكل موظف. يُرجى دائماً المطابقة النهائية مع منظومة مصلحة الضرائب قبل الصرف.
+  </p>
+</main>
+
+<footer>
+  <p class="made">مساعد المرتبات — إيجيترانس نوسكو</p>
+  <p>أداة داخلية لإدارة الموارد البشرية</p>
+</footer>
+
+
+<script src="assets/app.js"></script>
+</body>
+</html>
